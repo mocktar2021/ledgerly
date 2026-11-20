@@ -1,5 +1,5 @@
 // Unit test (Chapter 37): checks checkBookingConflict in isolation, no
-// real database — a fast, fake Supabase client stands in, since the
+// real database; a fast, fake Supabase client stands in, since the
 // logic under test is the comparison, not the storage.
 
 import { describe, it, expect, vi } from "vitest";

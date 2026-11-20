@@ -1,5 +1,5 @@
 // Shared test utilities. Integration and regression tests run against a
-// real (local/test) Supabase instance, not mocks — these helpers create
+// real (local/test) Supabase instance, not mocks; these helpers create
 // throwaway fixtures and clean up after themselves.
 
 import { getSupabaseServiceRoleClient } from "@/lib/supabase";

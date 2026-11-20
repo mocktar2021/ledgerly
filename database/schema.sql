@@ -1,5 +1,5 @@
 -- Consolidated current-state schema for Ledgerly.
--- This is a readable snapshot, not a migration — the migrations/ folder
+-- This is a readable snapshot, not a migration; the migrations/ folder
 -- is the actual source of truth for how the schema got here (Chapter 28).
 -- Update this file when adding a new migration so it stays accurate.
 
@@ -62,14 +62,14 @@ create table waitlist_entries (
 create index idx_waitlist_provider_id on waitlist_entries(provider_id);
 
 -- Webhook idempotency log (Chapter 44). System-level, no per-user
--- ownership — accessed via the service role client (see
+-- ownership; accessed via the service role client (see
 -- lib/services/webhookEvents.ts).
 create table processed_webhook_events (
   event_id text primary key,
   processed_at timestamptz not null default now()
 );
 
--- Rate limiting (Chapter 60 fix). System-level, no per-user ownership —
+-- Rate limiting (Chapter 60 fix). System-level, no per-user ownership;
 -- accessed via the service role client (see lib/rate-limit.ts).
 create table rate_limit_events (
   id uuid primary key default gen_random_uuid(),

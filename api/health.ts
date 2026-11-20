@@ -1,5 +1,5 @@
 // Health check (Chapter 48). Confirms the app and its critical
-// dependencies are actually working — used by the deployment platform to
+// dependencies are actually working; used by the deployment platform to
 // decide whether a new deploy is healthy, and by uptime monitoring.
 // Deliberately lightweight and public: no user data, no secrets.
 

@@ -1,5 +1,5 @@
 // Subscription business logic. Single source of truth for subscription
-// state — called from the checkout route and the Stripe webhook handler
+// state; called from the checkout route and the Stripe webhook handler
 // (Chapter 44), so both entry points stay in agreement.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -28,7 +28,7 @@ export async function syncSubscriptionStatusFromStripe(
   if (error) throw error;
 }
 
-// Cancels a subscription, verifying ownership first (Chapter 22 fix —
+// Cancels a subscription, verifying ownership first (Chapter 22 fix;
 // the subscription ID must belong to the requesting session's user, not
 // just be trusted from the request).
 export async function cancelSubscription(

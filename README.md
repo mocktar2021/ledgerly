@@ -6,14 +6,18 @@ This repository is the companion project for *Engineering for Vibe Coders* by Al
 
 ## What's here
 
-- Provider accounts, authentication, and dashboard
-- Client management (CRUD, search)
-- Individual and group session bookings, with a waitlist and buffer-time/capacity rules
-- Public booking page per provider, with a live availability preview and profile photo
-- Subscription billing and one-off invoice payments via Stripe (checkout, webhooks, full lifecycle handling)
-- Email and SMS reminders
-- Booking history export (CSV)
-- Structured logging, error tracking, and metrics (see `docs/adr/` for the observability approach)
+This repository holds the engineering layer the book builds: the services, API handlers, database migrations, tests, and operational docs. It does not include the UI (no `app/` or `components/` folder), so bring your own pages and wire them to these services.
+
+- `lib/services/`: business rules for bookings, clients, ownership checks, subscriptions, and webhook deduplication
+- `lib/validation/`: Zod schemas for request input
+- `lib/`: Supabase and Stripe clients, structured logger, Sentry setup, API error handling, rate limiting
+- `api/`: a health check and the Stripe webhook handler
+- `database/migrations/`: seven migrations, including Row Level Security and a staged column move; `database/schema.sql` is the current-state snapshot
+- `tests/`: unit tests, a regression test for the Chapter 1 ownership bug, and a Playwright end-to-end flow
+- `.github/workflows/ci.yml`: the CI/CD pipeline from Chapter 52
+- `docs/adr/`, `AGENTS.md`, `TROUBLESHOOTING.md`: decisions, agent rules, and the incident runbook
+
+The book also covers features whose code is not included here, such as the provider dashboard, the public booking page, and email/SMS reminders.
 
 ## Stack
 
@@ -21,33 +25,37 @@ This repository is the companion project for *Engineering for Vibe Coders* by Al
 - PostgreSQL via Supabase (Auth + Row Level Security)
 - Zod for request validation
 - Stripe (checkout, subscriptions, webhooks)
-- Resend (or equivalent) for email, a third-party API for SMS
-- Vercel (hosting, preview environments, CI/CD via GitHub Actions)
 - Sentry (error tracking)
 - Vitest (unit/integration tests), Playwright (end-to-end tests)
+- GitHub Actions for CI, Vercel for hosting
 
 ## Getting started
 
 ```
-npm install
-cp .env.example .env.local   # fill in Supabase, Stripe, SMS, and email keys
-npm run dev
+npm ci
+npm run typecheck
+npx vitest run tests/services   # unit tests, no database needed
 ```
 
-## Testing
+To run the full suite, create a non-production Supabase project, apply `database/migrations/` in order, then:
 
 ```
-npm test           # unit and integration tests (Vitest)
-npm run test:e2e   # end-to-end tests (Playwright)
-npm run typecheck  # TypeScript
+cp .env.example .env.local   # fill in test Supabase and Stripe values
+npm test                     # unit, integration, and regression tests
 ```
+
+`npm run dev` and `npm run test:e2e` need a UI in `app/`, which you add yourself.
+
+## CI
+
+Without the `TEST_SUPABASE_*` repository secrets, CI runs the type check and the unit tests and skips the database tests with a notice. Add the secrets (Settings > Secrets and variables > Actions) to run the full suite.
 
 ## Where to go for more
 
-- **`AGENTS.md`** — conventions this project expects AI coding agents (and humans) to follow: project structure, working rules, style, testing, security, and what requires explicit approval before an agent should attempt it. Read this before making any change.
-- **`docs/adr/`** — architecture decision records explaining *why* specific choices were made (data model, stack, structural decisions), not just what the current code does. Check here before re-deciding something that was already decided.
-- **`database/migrations/`** — every schema change, in order, with comments explaining staged/irreversible steps. `database/schema.sql` is a readable current-state snapshot.
-- **`TROUBLESHOOTING.md`** — the incident response runbook. Start here when something's reported broken.
+- **`AGENTS.md`**: conventions this project expects AI coding agents (and humans) to follow: project structure, working rules, style, testing, security, and what requires explicit approval before an agent should attempt it. Read this before making any change.
+- **`docs/adr/`**: architecture decision records explaining *why* specific choices were made (data model, stack, structural decisions), not just what the current code does. Check here before re-deciding something that was already decided.
+- **`database/migrations/`**: every schema change, in order, with comments explaining staged/irreversible steps. `database/schema.sql` is a readable current-state snapshot.
+- **`TROUBLESHOOTING.md`**: the incident response runbook. Start here when something's reported broken.
 
 ## About the book
 

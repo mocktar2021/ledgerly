@@ -1,5 +1,5 @@
 // Structured logging (Chapter 46). Every entry carries a timestamp, level,
-// message, and context — never raw secrets, tokens, or full payment
+// message, and context; never raw secrets, tokens, or full payment
 // details (see Chapter 46's "what never belongs in a log" rule).
 
 type LogContext = Record<string, string | number | boolean | undefined>;
@@ -12,7 +12,7 @@ function write(level: "info" | "warn" | "error", message: string, context: LogCo
     ...context,
   };
   // In production this ships to a log aggregation service. Locally, plain
-  // stdout is enough — the shape of the entry is what matters, not where
+  // stdout is enough; the shape of the entry is what matters, not where
   // it goes.
   // eslint-disable-next-line no-console
   console.log(JSON.stringify(entry));

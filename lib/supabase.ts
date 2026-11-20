@@ -1,4 +1,4 @@
-// Generic Supabase client setup. No Ledgerly-specific logic lives here —
+// Generic Supabase client setup. No Ledgerly-specific logic lives here;
 // see lib/services/ for that. Two clients are exported because they carry
 // different levels of trust (Chapter 25, Chapter 60).
 
@@ -19,7 +19,7 @@ export function getSupabaseClient(accessToken?: string): SupabaseClient {
 
 // Service role client: bypasses Row Level Security entirely. Only for
 // genuine administrative tasks that must see across every provider.
-// Never reach for this to work around an RLS error — see AGENTS.md and
+// Never reach for this to work around an RLS error; see AGENTS.md and
 // Chapter 25 / Chapter 60.
 export function getSupabaseServiceRoleClient(): SupabaseClient {
   return createClient(

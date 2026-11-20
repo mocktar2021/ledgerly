@@ -1,5 +1,5 @@
 // Error tracking (Chapter 47). Captures full internal detail for errors
-// that never reach the client — see lib/api-error.ts, which is the only
+// that never reach the client; see lib/api-error.ts, which is the only
 // place that should be calling logToSentry directly on ordinary requests.
 
 import * as Sentry from "@sentry/nextjs";

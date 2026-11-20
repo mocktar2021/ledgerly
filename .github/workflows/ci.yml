@@ -43,7 +43,11 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      # The regression tests run against a real non-production Supabase
+      # project. Without its secrets (for example on a fresh fork), run the
+      # unit tests only and say so, instead of failing the whole pipeline.
       - name: Check test database secrets are configured
+        id: dbsecrets
         env:
           TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           TEST_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
@@ -54,11 +58,18 @@ jobs:
           [ -z "$TEST_SUPABASE_ANON_KEY" ] && missing="$missing TEST_SUPABASE_ANON_KEY"
           [ -z "$TEST_SUPABASE_SERVICE_ROLE_KEY" ] && missing="$missing TEST_SUPABASE_SERVICE_ROLE_KEY"
           if [ -n "$missing" ]; then
-            echo "::error::Missing GitHub Actions secrets:$missing. The regression tests run against a real non-production Supabase project and cannot pass without them. Add them under Settings > Secrets and variables > Actions. Never use production keys here."
-            exit 1
+            echo "has_db=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Missing GitHub Actions secrets:$missing. Running unit tests only; database regression tests are skipped. Add them under Settings > Secrets and variables > Actions. Never use production keys here."
+          else
+            echo "has_db=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Unit tests only (no test database configured)
+        if: steps.dbsecrets.outputs.has_db != 'true'
+        run: npx vitest run tests/services
+
       - name: Unit, integration, and regression tests
+        if: steps.dbsecrets.outputs.has_db == 'true'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}

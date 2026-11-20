@@ -8,7 +8,7 @@ import { getSupabaseServiceRoleClient } from "@/lib/supabase";
 // This runs on the server-verified webhook route (Chapter 34), which has
 // no user session to derive an authenticated client from. The service
 // role client is appropriate here specifically because this table has no
-// per-user ownership concept — it's a system-level dedupe log, not user
+// per-user ownership concept; it's a system-level dedupe log, not user
 // data (contrast with Chapter 25 / Chapter 60's warning against reaching
 // for the service role key to bypass a legitimate RLS error).
 function client(): SupabaseClient {

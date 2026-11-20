@@ -14,7 +14,7 @@ Ledgerly: booking, invoicing, and client management for solo freelance service p
 - End-to-end tests: `npm run test:e2e`
 - Type check: `npm run typecheck`
 
-Run tests before considering any task finished. A task is not done if tests aren't passing, and passing tests are not by themselves proof the task is correct — see Tests below.
+Run tests before considering any task finished. A task is not done if tests aren't passing, and passing tests are not by themselves proof the task is correct; see Tests below.
 
 ## Project structure
 
@@ -25,9 +25,9 @@ Run tests before considering any task finished. A task is not done if tests aren
 - `lib/` (outside `services/`): generic reusable helpers with no Ledgerly-specific meaning (Supabase client, Stripe client, date formatting).
 - `types/`: shared TypeScript types. There is one canonical type per concept (for example, `Booking` in `types/booking.ts`). Use it. Don't define a local, slightly different shape for the same thing.
 - `tests/`: mirrors the structure of `lib/` and `api/`.
-- `database/migrations/`: all schema changes go through a migration. Never edit the schema directly. `database/schema.sql` is a readable current-state snapshot — keep it in sync when adding a migration.
-- `docs/adr/`: architecture decision records — why past decisions were made, not just what the code does. Check here before re-deciding something already decided.
-- `tests/e2e/`: Playwright end-to-end tests for critical flows only (Chapter 37) — not where ordinary unit/integration tests go.
+- `database/migrations/`: all schema changes go through a migration. Never edit the schema directly. `database/schema.sql` is a readable current-state snapshot; keep it in sync when adding a migration.
+- `docs/adr/`: architecture decision records: why past decisions were made, not just what the code does. Check here before re-deciding something already decided.
+- `tests/e2e/`: Playwright end-to-end tests for critical flows only (Chapter 37); not where ordinary unit/integration tests go.
 - `TROUBLESHOOTING.md`: the incident response runbook (Chapter 49). Follow it when investigating a reported problem.
 
 Naming: the canonical term for a scheduled session is "booking." Do not introduce "session" or "appointment" as alternate names for the same concept.
@@ -35,7 +35,7 @@ Naming: the canonical term for a scheduled session is "booking." Do not introduc
 ## Style
 
 - Match existing patterns in the file or feature area you're editing rather than introducing a new one, even if the new one seems better. Consistency across the codebase matters more than local elegance.
-- If an existing pattern genuinely needs to change, extend it deliberately for everyone — don't fork around it quietly for one case.
+- If an existing pattern genuinely needs to change, extend it deliberately for everyone; don't fork around it quietly for one case.
 - Do not refactor, restyle, rename, or "clean up" nearby code that wasn't part of the task, even if it looks like an improvement. Propose it separately.
 
 ## Tests
@@ -55,7 +55,7 @@ Naming: the canonical term for a scheduled session is "booking." Do not introduc
 ## Architecture
 
 - Components: UI only. Services: business logic. Routes: thin, call services. Reuse existing identifiers (Stripe customer IDs, Supabase user IDs) rather than looking records up by fields like email that aren't guaranteed unique.
-- No new database tables, new architectural complexity (queue, cache, separate service), or new dependencies without an explicit request — see `docs/adr/` for the reasoning behind past "no" decisions on exactly this kind of addition.
+- No new database tables, new architectural complexity (queue, cache, separate service), or new dependencies without an explicit request; see `docs/adr/` for the reasoning behind past "no" decisions on exactly this kind of addition.
 
 ## Forbidden without explicit human approval
 
@@ -71,4 +71,4 @@ Provide a short plan first: files affected, database impact, security impact, te
 
 ## Documenting decisions
 
-Document non-obvious business rules with a short comment at the point they're enforced, not just in a commit message. Significant architectural decisions get a short ADR in `docs/adr/` (title, status, context, decision, alternatives considered, consequences) — a page or less.
+Document non-obvious business rules with a short comment at the point they're enforced, not just in a commit message. Significant architectural decisions get a short ADR in `docs/adr/` (title, status, context, decision, alternatives considered, consequences); a page or less.

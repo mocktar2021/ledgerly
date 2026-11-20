@@ -1,7 +1,7 @@
 // End-to-end test (Chapter 37): exercises the critical flow exactly as a
 // real user would, through the actual interface. Slower and more
 // expensive than a unit or integration test, reserved for the handful of
-// truly critical paths — this is one of them.
+// truly critical paths; this is one of them.
 
 import { test, expect } from "@playwright/test";
 

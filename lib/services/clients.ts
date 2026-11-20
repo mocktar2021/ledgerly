@@ -16,7 +16,7 @@ export async function getClientsForProvider(supabase: SupabaseClient, providerId
 }
 
 // Client search (Chapter 57). Parameterized query via Supabase's query
-// builder — never string-concatenated — so a search term can never be
+// builder (never string-concatenated), so a search term can never be
 // interpreted as anything other than the text it is.
 export async function searchClients(
   supabase: SupabaseClient,
@@ -35,7 +35,7 @@ export async function searchClients(
 }
 
 // Repeat-client analytics (Chapter 29). Single aggregate query, grouped
-// by client_id (not name — see Chapter 26/27/28), instead of the
+// by client_id (not name; see Chapter 26/27/28), instead of the
 // original N+1 loop.
 export async function getRepeatClients(supabase: SupabaseClient, providerId: string) {
   const { data, error } = await supabase.rpc("get_repeat_clients", {

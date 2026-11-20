@@ -1,4 +1,4 @@
-// Booking business logic. Single source of truth for conflict checking —
+// Booking business logic. Single source of truth for conflict checking;
 // called from the booking creation route, the availability preview route
 // (Chapter 62), and anywhere else that needs this rule. Never reimplement
 // this check elsewhere; extend it here instead (Chapter 16).
