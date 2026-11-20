@@ -1,0 +1,38 @@
+{
+  "name": "ledgerly",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Booking, invoicing, and client management for solo freelance service providers. Companion project for Engineering for Vibe Coders by Alex Sterling.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "next": "^16.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@supabase/supabase-js": "^2.113.0",
+    "@supabase/ssr": "^0.12.5",
+    "stripe": "^22.6.0",
+    "zod": "^3.23.0",
+    "resend": "^4.0.0",
+    "@sentry/nextjs": "^10.70.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vitest": "^2.1.0",
+    "@vitest/ui": "^2.1.0",
+    "@playwright/test": "^1.48.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

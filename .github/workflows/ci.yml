@@ -1,0 +1,156 @@
+# CI/CD pipeline (Chapter 52).
+#
+# Each job needs the one before it, so a failure anywhere upstream means
+# everything downstream never runs. Deploy only happens from main, only after
+# test, security, and build all pass.
+#
+# Secrets this workflow reads (Settings > Secrets and variables > Actions):
+#   TEST_SUPABASE_URL, TEST_SUPABASE_ANON_KEY, TEST_SUPABASE_SERVICE_ROLE_KEY
+#       A NON-PRODUCTION Supabase project with database/migrations applied.
+#       The integration and regression tests create and delete real rows.
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#       Only needed for the deploy job. Skip them if you deploy through
+#       Vercel's own Git integration, and delete the deploy job instead.
+
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+
+# A newer push to the same ref cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # npm ci installs exactly what package-lock.json says (Chapter 21).
+      - run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Check test database secrets are configured
+        env:
+          TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          TEST_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+          TEST_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=""
+          [ -z "$TEST_SUPABASE_URL" ] && missing="$missing TEST_SUPABASE_URL"
+          [ -z "$TEST_SUPABASE_ANON_KEY" ] && missing="$missing TEST_SUPABASE_ANON_KEY"
+          [ -z "$TEST_SUPABASE_SERVICE_ROLE_KEY" ] && missing="$missing TEST_SUPABASE_SERVICE_ROLE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub Actions secrets:$missing. The regression tests run against a real non-production Supabase project and cannot pass without them. Add them under Settings > Secrets and variables > Actions. Never use production keys here."
+            exit 1
+          fi
+
+      - name: Unit, integration, and regression tests
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm test
+
+  security:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Fails the pipeline on any known high or critical advisory.
+      - name: Dependency vulnerability scan
+        run: npm audit --audit-level=high
+
+      # Secret scanning is best handled by GitHub itself. Turn on "Secret
+      # scanning" and "Push protection" under Settings > Code security.
+
+  build:
+    needs: security
+    runs-on: ubuntu-latest
+    outputs:
+      has_app: ${{ steps.detect.outputs.has_app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Next.js needs an app/ (or pages/) directory to build. This companion
+      # repository ships the services, API handlers, migrations, and tests,
+      # not the UI. Once you add app/, this job starts building for real.
+      - name: Detect application directory
+        id: detect
+        run: |
+          if [ -d app ] || [ -d src/app ] || [ -d pages ] || [ -d src/pages ]; then
+            echo "has_app=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_app=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No app/ or pages/ directory found, so the build and deploy steps are skipped."
+          fi
+
+      - name: Build
+        if: steps.detect.outputs.has_app == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+        run: npm run build
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build.outputs.has_app == 'true'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Check Vercel secrets are configured
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          missing=""
+          [ -z "$VERCEL_TOKEN" ] && missing="$missing VERCEL_TOKEN"
+          [ -z "$VERCEL_ORG_ID" ] && missing="$missing VERCEL_ORG_ID"
+          [ -z "$VERCEL_PROJECT_ID" ] && missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub Actions secrets:$missing"
+            exit 1
+          fi
+
+      # CLI version pinned on purpose (Chapter 21). Bump it deliberately.
+      - run: npm install --global vercel@66.6.0
+
+      # Production environment variables come from Vercel's own settings.
+      - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

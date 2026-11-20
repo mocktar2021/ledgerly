@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local environment files. Real values never go in Git (Chapter 19).
+# .env.example is the one exception: it holds names only, never values.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Vercel local link and CLI output
+.vercel/
+
+# Sentry CLI credentials
+.sentryclirc
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# IMPORTANT: do not add package-lock.json here (Chapter 21).
+# An overly broad ignore rule that excluded the lockfile is what let local and
+# production resolve different dependency versions. Commit the lockfile and
+# deploy with `npm ci`.
